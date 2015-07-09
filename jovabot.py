@@ -35,6 +35,10 @@ def listener(*messages):
                         answer_decoded = answer.decode('utf-8')
                     except UnicodeDecodeError as e:
                         answer_decoded = answer
+                    # placeholder management (only 1 placeholder allower in string, for now)
+                    placeholder_value = placeholder(answer_decoded)
+                    if placeholder_value:
+                        answer_decoded = "{0} "
                     tb.send_chat_action(chat_id, 'typing')
                     words_count = count_words(answer_decoded)
                     words_per_sec = 0.08
@@ -77,6 +81,12 @@ def jova_answer_new(message):
     jova_answer = plain_message.replace('s', 'f').replace('x', 'f')
     return jova_answer
 
+
+def placeholder(text, telegram_message):
+    if '%name%' in text:
+        return telegram_message.from_user.first_name
+    return None
+
 def read_jova_phrases():
     global swearing_phrases
     with open("phrases/swearing.txt", "r") as swearing_file:
@@ -111,6 +121,9 @@ def read_jova_conditions():
     for file in onlyfiles:
         with open('conditions/' + file) as f:
             conditions_list[file] = f.read().splitlines()
+
+
+
 
 
 def count_words(phrase):
